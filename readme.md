@@ -9,7 +9,7 @@ It’s a simple way to keep track of who owes who money within a group of people
 3. Run remix, and deploy the contract
 4. Paste the contract address in `script.js`
 5. Run `index.html` in browser and enjoy
-
+![alt text](imgs/index.png)
 
 ### Design Principles
 #### Resolve loops of debt
