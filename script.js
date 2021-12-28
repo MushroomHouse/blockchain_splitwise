@@ -11,6 +11,19 @@ var GENESIS = '0x000000000000000000000000000000000000000000000000000000000000000
 // ============================================================
 var abi = [
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "value1",
+				"type": "uint256"
+			}
+		],
+		"name": "test_value",
+		"type": "event"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -21,6 +34,11 @@ var abi = [
 				"internalType": "uint32",
 				"name": "amount",
 				"type": "uint32"
+			},
+			{
+				"internalType": "address[]",
+				"name": "path",
+				"type": "address[]"
 			}
 		],
 		"name": "add_IOU",
@@ -114,7 +132,7 @@ var abi = [
 abiDecoder.addABI(abi);
 // call abiDecoder.decodeMethod to use this - see 'getAllFunctionCalls' for more
 
-var contractAddress = '0x81C3Bc2486866Bd3aFa2Ba0694e8a2e8Ac1E3fBd'; // FIXME: fill this in with your contract's address/hash
+var contractAddress = '0x0f971AA9267283A58A57E42B48c0C6F67E69c962'; // FIXME: fill this in with your contract's address/hash
 var BlockchainSplitwise = new web3.eth.Contract(abi, contractAddress);
 
 // =============================================================================
@@ -169,12 +187,22 @@ async function getLastActive(user) {
 	}
 }
 
+//async function add_IOU_internal()
+// ["0x6b127f15c404edb631a7ecb869fda0dee8a208fc","0xca95dd96c86a17c7585027dabc57384a1513b5b3"]
+
 // TODO: add an IOU ('I owe you') to the system
 // The person you owe money is passed as 'creditor'
 // The amount you owe them is passed as 'amount'
-async function add_IOU(creditor, amount) {	
+async function add_IOU(creditor, amount) {
+	var debitor = web3.eth.defaultAccount;
+	
+	var path = await doBFS(creditor, debitor, getNeighbors);
+	if (!path) {
+		path = [];
+	}
+	console.log(444, path);
 	var MyContract = new web3.eth.Contract(abi, contractAddress);
-	await MyContract.methods.add_IOU(creditor, amount).send(
+	await MyContract.methods.add_IOU(creditor, amount, path).send(
 		{from: web3.eth.defaultAccount, gas: 3000000}
 	).then(console.log);
 }
