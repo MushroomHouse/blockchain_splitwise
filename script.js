@@ -132,7 +132,7 @@ var abi = [
 abiDecoder.addABI(abi);
 // call abiDecoder.decodeMethod to use this - see 'getAllFunctionCalls' for more
 
-var contractAddress = '0x0f971AA9267283A58A57E42B48c0C6F67E69c962'; // FIXME: fill this in with your contract's address/hash
+var contractAddress = '0x2350f602C5a92ecc8D7F0ef4768b3427A1b06EA3'; // FIXME: fill this in with your contract's address/hash
 var BlockchainSplitwise = new web3.eth.Contract(abi, contractAddress);
 
 // =============================================================================
@@ -218,12 +218,12 @@ async function lookup(debtor, creditor) {
 
 async function getNeighbors(node) {
 	var neighbors = [];
-	active_users = getUsers();
+	active_users = await getUsers();
 	for (var i = 0; i < active_users.length; i++) {
 		if (node == active_users[i]) {
 			continue;
 		}
-		var result = lookup(node, active_users[i]);
+		var result = await lookup(node, active_users[i]);
 		if (result > 0) {
 			// if node owns user i, add it as neighbour
 			neighbors.push(active_users[i]);
@@ -414,5 +414,5 @@ async function sanityCheck() {
 	console.log("Final Score: " + score +"/21");
 }
 
-sanityCheck() //Uncomment this line to run the sanity check when you first open index.html
+//sanityCheck() //Uncomment this line to run the sanity check when you first open index.html
 

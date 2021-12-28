@@ -29,7 +29,7 @@ contract BlockchainSplitwise {
                 uint32 cur_val = lookup(cur, path[i]);
                 require(cur_val != 0);
                 if (cur_val < min_val) {
-                    min_val = balances[cur][path[i]];
+                    min_val = cur_val;
                 }
                 cur = path[i];
             }
