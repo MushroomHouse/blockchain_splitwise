@@ -13,20 +13,20 @@ contract BlockchainSplitwise {
     function lookup(address debtor, address creditor) public view returns (uint32 ret) {
         return balances[debtor][creditor];
     }
+    
     event test_value(uint256 indexed value1);
-
 
     // Informs the contract that msg.sender now owes amount more dollars to creditor.
     function add_IOU(address creditor, uint32 amount, address[] memory path) public {
         require(msg.sender != creditor, "You can not owe yourself money");
+        
         // solve loop issue
         if (path.length > 0) {
-        //     // we got a loop
-        //     // from all the paths, find the minimal value
+        // we got a loop. From all the paths, find the minimal value
             uint32 min_val = amount;
             address cur = path[0];
             for (uint32 i = 1; i < path.length; i++) {
-                uint32 cur_val = lookup(cur, path[i]);
+                uint32 cur_val = lookup(cur, path[i]); // save gas
                 require(cur_val != 0);
                 if (cur_val < min_val) {
                     min_val = cur_val;
@@ -43,7 +43,7 @@ contract BlockchainSplitwise {
                 cur = path[i];
             }
             
-            // reset amount -= min, if 0, return early
+            // Set amount -= min, if 0, return early
             amount -= min_val;
             if (amount == 0) {
                 return;
@@ -57,6 +57,7 @@ contract BlockchainSplitwise {
             balances[msg.sender][creditor] += amount;
         }
 
+        // Add users if not visited
         if (unique_users[msg.sender] == false) {
             unique_users[msg.sender] = true;
             users.push(msg.sender);
@@ -68,7 +69,7 @@ contract BlockchainSplitwise {
         }
     }
 
-    function all_users() public view returns( address [] memory){
+    function all_users() public view returns(address [] memory){
         return users;
     }
 }

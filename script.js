@@ -132,7 +132,7 @@ var abi = [
 abiDecoder.addABI(abi);
 // call abiDecoder.decodeMethod to use this - see 'getAllFunctionCalls' for more
 
-var contractAddress = '0x2350f602C5a92ecc8D7F0ef4768b3427A1b06EA3'; // FIXME: fill this in with your contract's address/hash
+var contractAddress = '0xf343922A22aAa429026f20dd5F8a2Cf0e7ca4edd'; // FIXME: fill this in with your contract's address/hash
 var BlockchainSplitwise = new web3.eth.Contract(abi, contractAddress);
 
 // =============================================================================
@@ -147,8 +147,7 @@ var BlockchainSplitwise = new web3.eth.Contract(abi, contractAddress);
 // OR
 //   - a list of everyone currently owing or being owed money
 async function getUsers() {
-	var MyContract = new web3.eth.Contract(abi, contractAddress);
-	var balances =  await MyContract.methods.all_users().call();	
+	var balances =  await BlockchainSplitwise.methods.all_users().call();	
 	return balances;
 }
 
@@ -162,7 +161,6 @@ async function getTotalOwed(user) {
 		}
 		var result = await lookup(user, active_users[i]);
 		result = parseInt(result);
-		//console.log(111, user, active_users[i], result);
 		if (result > 0) {
 			total += result;
 		}
@@ -200,16 +198,13 @@ async function add_IOU(creditor, amount) {
 	if (!path) {
 		path = [];
 	}
-	console.log(444, path);
-	var MyContract = new web3.eth.Contract(abi, contractAddress);
-	await MyContract.methods.add_IOU(creditor, amount, path).send(
+	await BlockchainSplitwise.methods.add_IOU(creditor, amount, path).send(
 		{from: web3.eth.defaultAccount, gas: 3000000}
 	).then(console.log);
 }
 
 async function lookup(debtor, creditor) {
-	var MyContract = new web3.eth.Contract(abi, contractAddress);
-	var result = await MyContract.methods.lookup(debtor,creditor).call(
+	var result = await BlockchainSplitwise.methods.lookup(debtor,creditor).call(
 		{from: web3.eth.defaultAccount, gas: 3000000}
 	);
 	
@@ -414,5 +409,5 @@ async function sanityCheck() {
 	console.log("Final Score: " + score +"/21");
 }
 
-//sanityCheck() //Uncomment this line to run the sanity check when you first open index.html
+sanityCheck() //Uncomment this line to run the sanity check when you first open index.html
 
