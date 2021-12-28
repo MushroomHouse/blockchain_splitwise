@@ -132,7 +132,7 @@ var abi = [
 abiDecoder.addABI(abi);
 // call abiDecoder.decodeMethod to use this - see 'getAllFunctionCalls' for more
 
-var contractAddress = '0xf343922A22aAa429026f20dd5F8a2Cf0e7ca4edd'; // FIXME: fill this in with your contract's address/hash
+var contractAddress = '0x3874ACD26ac9783bCB05C97EdF30753c28f5a5d7'; // FIXME: fill this in with your contract's address/hash
 var BlockchainSplitwise = new web3.eth.Contract(abi, contractAddress);
 
 // =============================================================================
@@ -406,8 +406,52 @@ async function sanityCheck() {
 	var difference = timeNow - timeLastActive;
 	score += check("getLastActive(0) works", difference <= 60 && difference >= -3); // -3 to 60 seconds
 
-	console.log("Final Score: " + score +"/21");
+	// Loop 3->4, 4->5, 5->3
+	web3.eth.defaultAccount = accounts[3];
+	var response = await add_IOU(accounts[4], "50");
+	var lookup_3_4 = await BlockchainSplitwise.methods.lookup(accounts[3], accounts[4]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(3,4) now 50", parseInt(lookup_3_4, 10) === 50);
+	
+	web3.eth.defaultAccount = accounts[4];
+	var response = await add_IOU(accounts[5], "50");
+	var lookup_4_5 = await BlockchainSplitwise.methods.lookup(accounts[4], accounts[5]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(4,5) now 50", parseInt(lookup_4_5, 10) === 50);
+	
+	web3.eth.defaultAccount = accounts[5];
+	var response = await add_IOU(accounts[3], "50");
+	var lookup_5_3 = await BlockchainSplitwise.methods.lookup(accounts[5], accounts[3]).call({from:web3.eth.defaultAccount});
+	score += check("Resolved loop: lookup(5,3) now 0", parseInt(lookup_5_3, 10) === 0);
+	
+	// END OF LOOP 1
+	
+	// loop 6->7, 7->8, 8->6
+	web3.eth.defaultAccount = accounts[6];
+	var response = await add_IOU(accounts[7], "50");
+	var lookup_6_7 = await BlockchainSplitwise.methods.lookup(accounts[6], accounts[7]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(6,7) now 50", parseInt(lookup_6_7, 10) === 50);
+	
+	web3.eth.defaultAccount = accounts[7];
+	var response = await add_IOU(accounts[8], "50");
+	var lookup_7_8 = await BlockchainSplitwise.methods.lookup(accounts[7], accounts[8]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(7,8) now 50", parseInt(lookup_7_8, 10) === 50);
+	
+	web3.eth.defaultAccount = accounts[8];
+	var response = await add_IOU(accounts[6], "40");
+	var lookup_8_6 = await BlockchainSplitwise.methods.lookup(accounts[8], accounts[6]).call({from:web3.eth.defaultAccount});
+	score += check("Resolved loop: lookup(8,6) now 0", parseInt(lookup_8_6, 10) === 0);
+	
+	// END OF LOOP 1
+
+	// Verify the weight has been reduced from 50 to 10.
+	lookup_6_7 = await BlockchainSplitwise.methods.lookup(accounts[6], accounts[7]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(6,7) now 10", parseInt(lookup_6_7, 10) === 10);
+	
+	lookup_7_8 = await BlockchainSplitwise.methods.lookup(accounts[7], accounts[8]).call({from:web3.eth.defaultAccount});
+	score += check("lookup(7,8) now 10", parseInt(lookup_7_8, 10) === 10);
+	
+	console.log("Final Score: " + score +"/45");
 }
 
-sanityCheck() //Uncomment this line to run the sanity check when you first open index.html
 
+//Uncomment this line to run the sanity check when you first open index.html
+sanityCheck() 
